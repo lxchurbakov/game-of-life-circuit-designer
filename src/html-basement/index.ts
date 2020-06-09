@@ -1,6 +1,5 @@
 import { EventEmitter } from '../utils/events'
 
-// export type Canvas = {}
 export type Rect = { width: number, height: number }
 
 export default class HtmlBasement {

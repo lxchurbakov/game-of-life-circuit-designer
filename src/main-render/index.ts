@@ -1,15 +1,7 @@
-// import { EventEmitter } from '../utils/events'
 import HtmlBasement from '../html-basement'
 import GameState from '../game-state'
 
 export default class MainRender {
-  // rect: Rect
-  // canvas: HTMLCanvasElement
-  // context: CanvasRenderingContext2D
-  //
-  // onRender = new EventEmitter<CanvasRenderingContext2D>()
-  // state = { livingCells: [] }
-
   CELL_SIZE = 20
   PADDING = 1
 

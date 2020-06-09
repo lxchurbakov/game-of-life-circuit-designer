@@ -1,4 +1,3 @@
-// import { EventEmitter } from '../utils/events'
 import GameState from '../game-state'
 
 export type Cell = { x: number, y : number }
