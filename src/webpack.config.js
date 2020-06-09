@@ -2,15 +2,22 @@ const path = require('path')
 
 module.exports = {
   context: __dirname,
-  entry: './index.js',
+  entry: './index.ts',
 
   output: {
     path: path.resolve(__dirname, '../pages'),
     filename: 'bundle.js',
   },
 
+  resolve: {
+    extensions: [
+      '.ts', '.js', '.tsx', '.json'
+    ],
+  },
+
   module: {
     rules: [
+      { test: /\.ts/, loader: 'ts-loader' },
       { test: /\.js/, loader: 'babel-loader' },
       { test: /\.html$/, loader: 'file-loader?name=[name].html' },
     ],
