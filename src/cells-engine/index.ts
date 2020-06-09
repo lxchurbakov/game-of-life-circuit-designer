@@ -6,12 +6,12 @@ export default class CellsEnginge {
   paused = false
 
   constructor (private gameState: GameState) {
-    setInterval(this.proceed, 100)
+    setInterval(this.forth, 100)
   }
 
   togglePause = () => this.paused = !this.paused
 
-  proceed = () => {
+  forth = () => {
     const items = this.gameState.livingCells
 
     if (items.length === 0 || this.paused) {
@@ -62,6 +62,10 @@ export default class CellsEnginge {
     /* /TODO unrefactored code end*/
 
     this.gameState.livingCells = nextItems
+  }
+
+  back = () => {
+    /* TODO */
   }
 }
 

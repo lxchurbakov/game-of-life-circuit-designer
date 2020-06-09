@@ -4,15 +4,23 @@ import HtmlBasement from './html-basement'
 import GameState from './game-state'
 import MainRender from './main-render'
 import CellsEngine from './cells-engine'
+import AdvancedEvents from './advanced-events'
+import GameMode from './game-mode'
+import MapNavigation from './map-navigation'
+import BottomInterface from './bottom-interface'
 
 document.addEventListener('DOMContentLoaded', (e) => {
   const root = document.getElementById('app')
 
-  const htmlBasement = new HtmlBasement(root)
-  const gameState = new GameState()
-  const render = new MainRender(htmlBasement, gameState)
-  const engine = new CellsEngine(gameState)
+  const html = new HtmlBasement(root)
+  const state = new GameState()
 
-  /* Put interface out ? */
+  const engine = new CellsEngine(state)
+  const events = new AdvancedEvents(html)
+  const mode = new GameMode()
+  const map = new MapNavigation(html, events)
+
+  const render = new MainRender(state, map)
+  const bottomUI = new BottomInterface(html, engine, events)
 })
 

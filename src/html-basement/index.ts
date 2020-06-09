@@ -3,13 +3,18 @@ import { EventEmitter } from '../utils/events'
 export type Rect = { width: number, height: number }
 
 export default class HtmlBasement {
-  rect: Rect
-  canvas: HTMLCanvasElement
-  context: CanvasRenderingContext2D
+  public rect: Rect
+  public canvas: HTMLCanvasElement
+  public context: CanvasRenderingContext2D
+  public interface: HTMLElement
 
-  onRender = new EventEmitter<CanvasRenderingContext2D>()
+  public onRender = new EventEmitter<CanvasRenderingContext2D>()
+  public onInitInterface = new EventEmitter<HTMLElement>()
 
-  constructor (private root: HTMLElement) {
+  constructor (public root: HTMLElement) {
+    /**
+     * Canvas section
+     */
     this.rect = this.root.getBoundingClientRect();
     this.canvas = document.createElement('canvas')
 
@@ -24,7 +29,22 @@ export default class HtmlBasement {
 
     requestAnimationFrame(this.render)
 
-    /* TODO UI slots come here */
+    /**
+     * Interface section (creates a node, adds hooks)
+     */
+    this.interface = document.createElement('div')
+
+    this.interface.style.position = 'absolute'
+    this.interface.style.top = '0px'
+    this.interface.style.left = '0px'
+    this.interface.style.width = '100vw'
+    this.interface.style.height = '100vh'
+
+    this.root.appendChild(this.interface)
+
+    setTimeout(() => {
+      this.onInitInterface.emitSync(this.interface)
+    }, 0)
   }
 
   render = () => {
