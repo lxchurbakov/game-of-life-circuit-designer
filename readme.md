@@ -1,4 +1,4 @@
-# 👾Conway's Game of Life
+# 👾 Conway's Game of Life
 
 Yet another game of life implementation. In typescript, runs in browser
 
