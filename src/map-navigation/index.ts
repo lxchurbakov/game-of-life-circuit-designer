@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { EventEmitter } from '../utils/events'
 
 import AdvancedEvents, { Point } from '../advanced-events'
@@ -5,7 +7,7 @@ import HtmlBasement from '../html-basement'
 
 export default class MapNavigation {
   private offset: Point = { x: 0, y: 0 }
-  private zoom = 1000
+  private zoom = 1
 
   public onRenderWithinGameCoordinates = new EventEmitter<CanvasRenderingContext2D>()
 
@@ -20,7 +22,7 @@ export default class MapNavigation {
   }
 
   render = (context: CanvasRenderingContext2D) => {
-    const zoomX = this.zoom / 1000, zoomY = this.zoom / 1000
+    const zoomX = this.zoom, zoomY = this.zoom
 
     context.translate(this.html.rect.width / 2, this.html.rect.height / 2)
     context.scale(zoomX, zoomY)
@@ -35,14 +37,12 @@ export default class MapNavigation {
   }
 
   handleDrag = ({ x, y }: Point) => {
-    this.offset.x += x
-    this.offset.y += y
+    this.offset.x += x / this.zoom
+    this.offset.y += y / this.zoom
   }
 
   handleZoom = (v: number) => {
-    this.zoom += v
-
-    this.offset.x += this.offset.x * v / 1000
-    this.offset.y += this.offset.y * v / 1000
+    this.zoom += v / 1000
+    this.zoom = Math.max(0.1, Math.min(10, this.zoom))
   }
 }
