@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npx webpack --config src/webpack.config.js",
     "dev": "npx webpack-dev-server --config src/webpack.config.js"
   },
   "author": "",
@@ -24,6 +25,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "etch": "^0.14.0",
     "lodash": "^4.17.15"
   }
 }
