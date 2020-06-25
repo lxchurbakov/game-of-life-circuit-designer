@@ -4,7 +4,7 @@ import MapNavigation from '../map-navigation'
 import CellsEngine from '../cells-engine'
 
 export default class MainRender {
-  CELL_SIZE = 20
+  public CELL_SIZE = 20
   PADDING = 1
 
   constructor (private state: GameState, private map: MapNavigation, private engine: CellsEngine) {
@@ -16,6 +16,6 @@ export default class MainRender {
       context.fillRect(x * this.CELL_SIZE, y * this.CELL_SIZE, this.CELL_SIZE - this.PADDING, this.CELL_SIZE - this.PADDING)
     })
 
-    context.fillText(`FPS: ${1000 / this.engine.frameTime}`, 10, 10)
+    // context.fillText(`FPS: ${1000 / this.engine.frameTime}`, 10, 10)
   }
 }

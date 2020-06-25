@@ -2,6 +2,13 @@ import etch from 'etch'
 import { loadStyles } from '../utils/styles'
 
 loadStyles(`
+  .palette {
+    position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%); background: white;
+    border-top-right-radius: 30px; overflow: hidden;
+    border-bottom-right-radius: 30px; box-shadow: 0 0 3px 3px rgba(0, 0, 0, .1);
+  }
+
   .palette-button {
     padding: 14px; display: flex; align-items: center; flex-direction: column; margin-bottom: 8px; cursor: pointer;
   }
@@ -85,14 +92,10 @@ export default class App {
     const { mode } = this.props
 
     return (
-      <div style="
-        position: absolute; left: 0; top: 50%;
-        transform: translateY(-50%); background: white;
-        border-top-right-radius: 30px; overflow: hidden;
-        border-bottom-right-radius: 30px; box-shadow: 0 0 3px 3px rgba(0, 0, 0, .1);
-      ">
-        <Button emoji="✋" text="Drag" active={mode === 'drag'} onClick={() => this.setMode('drag')} />
-        <Button emoji="✍️" text="Draw" active={mode === 'draw'} onClick={() => this.setMode('draw')} />
+      <div className="palette">
+        <Button emoji="✋" text="Drag (D)" active={mode === 'drag'} onClick={() => this.setMode('drag')} />
+        <Button emoji="✍️" text="Draw (W)" active={mode === 'draw'} onClick={() => this.setMode('draw')} />
+        <Button emoji="✂" text="Erase (E)" active={mode === 'erase'} onClick={() => this.setMode('erase')} />
       </div>
     )
   }
