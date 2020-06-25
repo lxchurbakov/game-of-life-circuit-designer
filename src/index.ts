@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
   const mode = new GameMode()
   const map = new MapNavigation(html, events)
 
-  const render = new MainRender(state, map)
+  const render = new MainRender(state, map, engine)
   const bottomUI = new BottomInterface(html, engine, events)
 })
 

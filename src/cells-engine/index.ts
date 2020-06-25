@@ -1,72 +1,95 @@
+import _ from 'lodash'
 import GameState from '../game-state'
 
 export type Cell = { x: number, y : number }
 
+/**
+ * Cells Engine updates game state (next cells generation)
+ */
 export default class CellsEnginge {
   paused = false
+  public frameTime = 0
+  lastTimeUpdated = new Date().getTime()
 
   constructor (private gameState: GameState) {
-    setInterval(this.forth, 100)
+    setInterval(this.forth, 0)
   }
 
-  togglePause = () => this.paused = !this.paused
+  /* Method that toggles pause (inner state) */
+  togglePause = () =>
+    this.paused = !this.paused
 
   forth = () => {
-    const items = this.gameState.livingCells
 
-    if (items.length === 0 || this.paused) {
+    if (this.paused) {
       return
     }
 
-    const xystoprocess = items.reduce((acc, item) => acc.concat([
-      { x: item.x, y: item.y },
+    const { livingCells } = this.gameState
 
-      { x: item.x - 1, y: item.y },
-      { x: item.x - 1, y: item.y - 1 },
-      { x: item.x, y: item.y - 1 },
+    // let newCells = []
+    let indexedCells = []
 
-      { x: item.x + 1, y: item.y },
-      { x: item.x + 1, y: item.y + 1 },
-      { x: item.x, y: item.y + 1 },
-
-      { x: item.x - 1, y: item.y + 1 },
-      { x: item.x + 1, y: item.y - 1 },
-    ]), []).sort((a, b) => (a.x === b.x ? (a.y > b.y ? 1 : -1) : (a.x > b.x ? 1 : -1)))
-
-    let nextItems = []
-    let prev = { x: null, y: null }
-
-    xystoprocess.forEach(({ x, y }) => {
-      if (prev.x !== x || prev.y !== y) {
-        const countOfNeightbors = items.filter((item) => isNeighbor(item, x, y)).length
-        const isLive = !!items.filter((item) => item.x === x && item.y === y).pop()
-
-        if (countOfNeightbors < 2) {
-          // go commit die
-        } else if (countOfNeightbors === 2) {
-          // stay
-          if (isLive) {
-            nextItems.push({ x, y })
-          }
-        } else if (countOfNeightbors === 3) {
-          // go commit live
-          nextItems.push({ x, y })
-        } else if (countOfNeightbors > 3) {
-          // die again
-        }
-
-        prev = {x, y}
-      }
+    livingCells.forEach(({ x, y }) => {
+      indexedCells[x] = indexedCells[x] || []
+      indexedCells[x][y] = true
     })
 
-    /* /TODO unrefactored code end*/
+    let nextCells = []
 
-    this.gameState.livingCells = nextItems
+    livingCells.forEach(({ x, y }) => {
+      [
+        [x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
+        [x - 1, y], [x, y], [x + 1, y],
+        [x - 1, y + 1], [x, y + 1], [x + 1, y + 1],
+      ].forEach(([x, y]) => {
+        if (shouldBeAlive(indexedCells, x, y)) {
+          nextCells.push({ x, y })
+        }
+      })
+    })
+
+    this.gameState.livingCells = _.uniqBy(nextCells, ({ x, y }) => `${x},${y}`)
+
+    let time = new Date().getTime()
+    this.frameTime = (this.frameTime * 49 + (time - this.lastTimeUpdated)) / 50
+    this.lastTimeUpdated = time
   }
 
   back = () => {
     /* TODO */
   }
+}
+
+const shouldBeAlive = (indexedCells, x, y) => {
+  const countOfNeightbors = [
+    [x - 1, y - 1],
+    [x - 1, y],
+    [x - 1, y + 1],
+    [x, y + 1],
+    [x + 1, y + 1],
+    [x + 1, y],
+    [x + 1, y - 1],
+    [x, y - 1],
+  ].reduce((acc, [x, y]) => acc + (!!((indexedCells || [])[x] || [])[y] ? 1 : 0), 0)
+
+  const isLive = !!((indexedCells || [])[x] || [])[y]
+
+  if (countOfNeightbors < 2) {
+    // go commit die
+  } else if (countOfNeightbors === 2) {
+    // stay
+    if (isLive) {
+      return true
+    }
+  } else if (countOfNeightbors === 3) {
+    // go commit live
+    return true
+  } else if (countOfNeightbors > 3) {
+    // die again
+  }
+
+  return false
 }
 
 /**
