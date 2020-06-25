@@ -7,7 +7,9 @@ import CellsEngine from './cells-engine'
 import AdvancedEvents from './advanced-events'
 import GameMode from './game-mode'
 import MapNavigation from './map-navigation'
+
 import BottomInterface from './bottom-interface'
+import InstrumentsPalette from './instruments-palette'
 
 document.addEventListener('DOMContentLoaded', (e) => {
   const root = document.getElementById('app')
@@ -22,5 +24,6 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
   const render = new MainRender(state, map, engine)
   const bottomUI = new BottomInterface(html, engine, events)
+  const palette = new InstrumentsPalette(html, mode)
 })
 

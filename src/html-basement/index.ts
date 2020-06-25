@@ -2,6 +2,9 @@ import { EventEmitter } from '../utils/events'
 
 export type Rect = { width: number, height: number }
 
+/**
+ * HTML BASEMENT plugin initializes html node, creats canvas and sets up rendering cycle
+ */
 export default class HtmlBasement {
   public rect: Rect
   public canvas: HTMLCanvasElement

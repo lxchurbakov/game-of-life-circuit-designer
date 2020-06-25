@@ -4,7 +4,7 @@
 
 
 export default class GameModes {
-  modeValue = 'default'
+  modeValue = 'drag'
 
   get mode () {
     return this.modeValue

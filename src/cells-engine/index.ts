@@ -12,7 +12,7 @@ export default class CellsEnginge {
   lastTimeUpdated = new Date().getTime()
 
   constructor (private gameState: GameState) {
-    setInterval(this.forth, 0)
+    setInterval(this.forth, 100)
   }
 
   /* Method that toggles pause (inner state) */
