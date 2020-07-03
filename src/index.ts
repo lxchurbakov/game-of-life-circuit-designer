@@ -13,6 +13,7 @@ import InstrumentsPalette from './instruments-palette'
 
 import GameActions from './game-actions'
 
+
 document.addEventListener('DOMContentLoaded', (e) => {
   const root = document.getElementById('app')
 
