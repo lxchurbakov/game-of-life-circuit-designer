@@ -12,3 +12,4 @@ Yet another game of life implementation. In typescript, runs in browser
 
 - Make a step back (not safe)
 - Cell structures palette
+- rules change
