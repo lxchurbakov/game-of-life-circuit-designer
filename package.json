@@ -1,13 +1,11 @@
 {
   "name": "game-of-life",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "build": "npx webpack --config src/webpack.config.js",
-    "dev": "npx webpack-dev-server --config src/webpack.config.js"
+    "dev": "npx parcel serve src/index.html"
   },
-  "author": "",
+  "author": "swensson",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.8.3",
@@ -28,6 +26,7 @@
   },
   "dependencies": {
     "etch": "^0.14.0",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "parcel": "^2.8.0"
   }
 }
