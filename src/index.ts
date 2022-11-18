@@ -1,8 +1,8 @@
 import Bootstrap from './bootstrap'
 import GameOfLife from './game-of-life';
-// import MainRender from './main-render'
-// import CellsEngine from './cells-engine'
-// import AdvancedEvents from './advanced-events'
+import AdvancedEvents from './advanced-events';
+
+import Editor from './editor';
 // import GameMode from './game-mode'
 // import MapNavigation from './map-navigation'
 
@@ -17,8 +17,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
   const bootstrap = new Bootstrap(root);
   const gameOfLife = new GameOfLife(bootstrap);
 
-  // const engine = new CellsEngine(state)
-  // const events = new AdvancedEvents(html)
+  const events = new AdvancedEvents(bootstrap);
+
+  const editor = new Editor(events, gameOfLife);
   // const mode = new GameMode()
   // const map = new MapNavigation(html)
 

@@ -10,7 +10,7 @@ const splitIntoTokens = (rle: string) => {
     
     return rle.split('').reduce((acc, token) => {
         if (isDigit(token) && acc.length > 0 && isDigit(acc[acc.length - 1])) {
-            acc[acc.length-1] += token;
+            acc[acc.length-1] += ''+ token;
             return acc;
         } else {
             return acc.concat([token]);
@@ -35,7 +35,7 @@ const splitIntoTokens = (rle: string) => {
     }, []);
 };
 
-export const parse = (rle: string) => {
+export const parse = (rle: string, offset: { x: number, y: number } = { x: 0, y: 0 }) => {
     let y = 0;
     let x = 0;
 
@@ -51,7 +51,7 @@ export const parse = (rle: string) => {
 
         if (token.type === 'o') {
             for (let i = 0; i < token.count; ++i) {
-                acc.push({ x: x + i, y });
+                acc.push({ x: x + i + offset.x, y: y + offset.y });
             }
             x += token.count;
         }
