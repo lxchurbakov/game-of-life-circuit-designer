@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Bootstrap from "../bootstrap";
-import { parse } from '../utils/parse';
+import { EventEmitter } from '../utils/events';
 
 export type Cell = { x: number, y: number };
 
@@ -95,10 +95,14 @@ export default class GameOfLife {
 		this.state = _.uniqBy(nextCells, ({ x, y }) => `${x},${y}`);
 	};
 
+	public onWrapRender = new EventEmitter<any>();
+
 	private render = (context: CanvasRenderingContext2D) => {
-		this.state.forEach(({ x, y }) => {
-			context.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - PADDING, CELL_SIZE - PADDING)
-		})
+		this.onWrapRender.emitSequenceSync((context) => {
+			this.state.forEach(({ x, y }) => {
+				context.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - PADDING, CELL_SIZE - PADDING);
+			});
+		})(context);
 	};
 };
 

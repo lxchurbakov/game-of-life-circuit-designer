@@ -3,15 +3,16 @@ import ReactToolbar from '../react-toolbar';
 import AdvancedEvents from '../advanced-events';
 import GameOfLife, { CELL_SIZE } from '../game-of-life';
 import ApplicationModes from '../application-modes';
+import BrowsingMode from '../browsing-mode';
 
-import { map, replay, useObservable } from '../utils/observable';
+import { map, useObservable } from '../utils/observable';
 
 import { HandDraw } from '@styled-icons/fluentui-system-filled/HandDraw';
-import { last } from 'lodash';
+// import { last } from 'lodash';
 
-const SPACE_KEY = 32;
-const W_KEY = 87;
-const E_KEY = 69;
+// const SPACE_KEY = 32;
+// const W_KEY = 87;
+// const E_KEY = 69;
 
 const DrawingModeToolbarExtension = ({ active$ }) => {
     const active = useObservable(active$);
@@ -22,59 +23,33 @@ const DrawingModeToolbarExtension = ({ active$ }) => {
 };
 
 export default class DrawingMode {
-    private mode = 'edit';
-    private snapshot = null;
+    // private snapshot = null;
     private erase = false;
 
-    // public active$ = subject(true);
-
-    constructor (private modes: ApplicationModes, private toolbar: ReactToolbar, private events: AdvancedEvents, private gameOfLife: GameOfLife) {
+    constructor (private modes: ApplicationModes, private toolbar: ReactToolbar, private events: AdvancedEvents, private gameOfLife: GameOfLife, private browsingMode: BrowsingMode) {
         this.toolbar.onContent.subscribe(() => {
-            return <DrawingModeToolbarExtension active$={this.modes.mode$.pipe(map((mode) => mode === 'draw'))} />;
+            return (
+                <DrawingModeToolbarExtension 
+                    active$={this.modes.mode$.pipe(map((mode) => mode === 'draw'))} 
+                />
+            );
         });
 
-        // Toggle between browsing mode and drawing mode on space pressed
-        // this.events.onKeyDown.subscribe((key) => {
-        //     if (key === SPACE_KEY) {
-        //         this.active$.next(false);
+        // this.events.onKey.subscribe((key) => {        
+        //     if (key === W_KEY) {
+        //         if (this.mode === 'simulate') {
+        //             this.mode = 'edit';
+        
+        //             this.gameOfLife.stop();
+        //             this.gameOfLife.load(this.snapshot);
+        //         }
         //     }
         // });
 
-        // this.events.onKeyUp.subscribe((key) => {
-        //     if (key === SPACE_KEY) {
-        //         this.active$.next(true);
-        //     }
-        // });
 
-        this.events.onKey.subscribe((key) => {
-            // if (key === SPACE_KEY) {
-            //     this.active 
-            // }
-            // if (key === SPACE_KEY) {
-            //     if (this.mode === 'edit') {
-            //         this.mode = 'simulate';
-            //         this.snapshot = this.gameOfLife.save();
-            //     }
-        
-            //     if (this.gameOfLife.isPaused()) {
-            //         this.gameOfLife.start();
-            //     } else {
-            //         this.gameOfLife.stop();
-            //     }
-            // }
-        
-            if (key === W_KEY) {
-                if (this.mode === 'simulate') {
-                    this.mode = 'edit';
-        
-                    this.gameOfLife.stop();
-                    this.gameOfLife.load(this.snapshot);
-                }
-            }
-        });
         
         const handlePoint = (x: number, y: number) => {
-            if (this.mode !== 'edit' || this.modes.get() !== 'draw') {
+            if (this.modes.get() !== 'draw') {
                 return;
             }
         
@@ -90,13 +65,11 @@ export default class DrawingMode {
         this.events.onMouseDown.subscribe(({ x, y }) => {
             if (!mousepressed) {
                 mousepressed = true;
+
+                const cell = this.screenPosToCellPoint({ x, y });
         
-                const cellX = Math.floor(x / CELL_SIZE);
-                const cellY = Math.floor(y / CELL_SIZE);
-        
-                this.erase = this.gameOfLife.has(cellX, cellY);
-        
-                handlePoint(cellX, cellY);
+                this.erase = this.gameOfLife.has(cell.x, cell.y);
+                handlePoint(cell.x, cell.y);
             }
         });
         
@@ -105,17 +78,18 @@ export default class DrawingMode {
         });
         
         this.events.onMouseMove.subscribe(({ x, y }) => {
-            if (mousepressed) {
-                const cellX = Math.floor(x / CELL_SIZE);
-                const cellY = Math.floor(y / CELL_SIZE);
-        
-                handlePoint(cellX, cellY);
+            if (mousepressed) {       
+                const cell = this.screenPosToCellPoint({ x, y });
+
+                handlePoint(cell.x, cell.y);
             }
         });
     }
+
+    private screenPosToCellPoint = ({ x, y }) => {
+        return {
+            x: Math.floor((x - this.browsingMode.translate.x) / CELL_SIZE),
+            y: Math.floor((y - this.browsingMode.translate.y) / CELL_SIZE),
+        };
+    };
 };
-
-
-
-
-

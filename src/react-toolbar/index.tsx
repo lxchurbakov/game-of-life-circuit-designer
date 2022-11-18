@@ -14,6 +14,9 @@ const ReactToolbarWrap = styled.div`
     background: white;
     padding: 12px;
     box-shadow: 0 0 4px 0 rgba(0, 0, 0, .12);
+
+    display: flex;
+    gap: 12px;
 `;
 
 const EmptyToolbar = styled.div`
@@ -26,14 +29,16 @@ export default class ReactToolbar {
     public onContent = new EventEmitter<null>();
 
     constructor (private bootstrap: Bootstrap) {
-        const content = this.onContent.emitParallelSync(null);
+        this.bootstrap.onLayout.subscribe((layout: HTMLElement) => {
+            const content = this.onContent.emitParallelSync(null);
 
-        ReactDOM.render((
-            <ReactToolbarWrap>
-                {content.length === 0 ? (
-                    <EmptyToolbar>No instruments available</EmptyToolbar>
-                ) : content}
-            </ReactToolbarWrap>
-        ), this.bootstrap.layout);
+            ReactDOM.render((
+                <ReactToolbarWrap>
+                    {content.length === 0 ? (
+                        <EmptyToolbar>No instruments available</EmptyToolbar>
+                    ) : content}
+                </ReactToolbarWrap>
+            ), layout);
+        });
     }
 };

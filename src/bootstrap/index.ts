@@ -3,59 +3,59 @@ import { EventEmitter } from '../utils/events';
 export type Rect = { width: number, height: number };
 
 export default class Bootstrap {
-  public rect: Rect;
-  public canvas: HTMLCanvasElement;
-  public context: CanvasRenderingContext2D;
-  
-  public layout: HTMLElement;
+	public rect: Rect;
+	public canvas: HTMLCanvasElement;
+	public context: CanvasRenderingContext2D;
 
-  public onRender = new EventEmitter<CanvasRenderingContext2D>();
-  public onLayout = new EventEmitter<HTMLElement>();
+	public layout: HTMLElement;
 
-  constructor (private root: HTMLElement) {
-    /**
-     *  Initializing canvas node and context
-     */
-    this.rect = this.root.getBoundingClientRect();
-    this.canvas = document.createElement('canvas');
+	public onRender = new EventEmitter<CanvasRenderingContext2D>();
+	public onLayout = new EventEmitter<HTMLElement>();
 
-    this.canvas.style.width = this.rect.width + 'px';
-    this.canvas.style.height = this.rect.height + 'px';
-    this.canvas.width = this.rect.width;
-    this.canvas.height = this.rect.height;
+	constructor(private root: HTMLElement) {
+		/**
+		 *  Initializing canvas node and context
+		 */
+		this.rect = this.root.getBoundingClientRect();
+		this.canvas = document.createElement('canvas');
 
-    this.root.appendChild(this.canvas);
+		this.canvas.style.width = this.rect.width + 'px';
+		this.canvas.style.height = this.rect.height + 'px';
+		this.canvas.width = this.rect.width;
+		this.canvas.height = this.rect.height;
 
-    this.context = this.canvas.getContext('2d');
+		this.root.appendChild(this.canvas);
 
-    /**
-     * Now we proceed to interface node - the one that
-     * will accept all the interactions
-     */
-    this.layout = document.createElement('div');
+		this.context = this.canvas.getContext('2d');
 
-    this.layout.style.position = 'absolute';
-    this.layout.style.top = '0px';
-    this.layout.style.left = '0px';
-    this.layout.style.width = '100%';
-    this.layout.style.height = '100%';
+		/**
+		 * Now we proceed to interface node - the one that
+		 * will accept all the interactions
+		 */
+		this.layout = document.createElement('div');
 
-    this.root.appendChild(this.layout);
+		this.layout.style.position = 'absolute';
+		this.layout.style.top = '0px';
+		this.layout.style.left = '0px';
+		this.layout.style.width = '100%';
+		this.layout.style.height = '100%';
 
-    setTimeout(() => {
-      this.onLayout.emitSync(this.layout);
-      this.render();
-    }, 0);
-  }
+		this.root.appendChild(this.layout);
 
-  /**
-   * Render function
-   */
-  public render = () => {
-    this.context.clearRect(0, 0, this.rect.width, this.rect.height);
+		setTimeout(() => {
+			this.onLayout.emitSync(this.layout);
+			this.render();
+		}, 0);
+	}
 
-    this.onRender.emitSync(this.context);
+	/**
+	 * Render function
+	 */
+	public render = () => {
+		this.context.clearRect(0, 0, this.rect.width, this.rect.height);
 
-    requestAnimationFrame(this.render);
-  };
+		this.onRender.emitSync(this.context);
+
+		requestAnimationFrame(this.render);
+	};
 };
