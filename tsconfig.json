@@ -20,7 +20,6 @@
       "dom"
     ],
     "jsx": "react",
-    "jsxFactory": "etch.dom",
     "paths": {
       "@/*": ["./*"],
     }

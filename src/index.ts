@@ -3,6 +3,8 @@ import GameOfLife from './game-of-life';
 import AdvancedEvents from './advanced-events';
 
 import Editor from './editor';
+
+import ReactToolbar from './react-toolbar';
 // import GameMode from './game-mode'
 // import MapNavigation from './map-navigation'
 
@@ -20,6 +22,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
   const events = new AdvancedEvents(bootstrap);
 
   const editor = new Editor(events, gameOfLife);
+  
+  const toolbar = new ReactToolbar(bootstrap);
+
   // const mode = new GameMode()
   // const map = new MapNavigation(html)
 
