@@ -8,11 +8,8 @@ import BrowsingMode from '../browsing-mode';
 import { map, useObservable } from '../utils/observable';
 
 import { HandDraw } from '@styled-icons/fluentui-system-filled/HandDraw';
-// import { last } from 'lodash';
 
-// const SPACE_KEY = 32;
-// const W_KEY = 87;
-// const E_KEY = 69;
+const D_KEY = 68;
 
 const DrawingModeToolbarExtension = ({ active$ }) => {
     const active = useObservable(active$);
@@ -23,7 +20,6 @@ const DrawingModeToolbarExtension = ({ active$ }) => {
 };
 
 export default class DrawingMode {
-    // private snapshot = null;
     private erase = false;
 
     constructor (private modes: ApplicationModes, private toolbar: ReactToolbar, private events: AdvancedEvents, private gameOfLife: GameOfLife, private browsingMode: BrowsingMode) {
@@ -35,19 +31,6 @@ export default class DrawingMode {
             );
         });
 
-        // this.events.onKey.subscribe((key) => {        
-        //     if (key === W_KEY) {
-        //         if (this.mode === 'simulate') {
-        //             this.mode = 'edit';
-        
-        //             this.gameOfLife.stop();
-        //             this.gameOfLife.load(this.snapshot);
-        //         }
-        //     }
-        // });
-
-
-        
         const handlePoint = (x: number, y: number) => {
             if (this.modes.get() !== 'draw') {
                 return;
@@ -82,6 +65,12 @@ export default class DrawingMode {
                 const cell = this.screenPosToCellPoint({ x, y });
 
                 handlePoint(cell.x, cell.y);
+            }
+        });
+
+        this.events.onKeyDown.subscribe((key) => {
+            if (key === D_KEY) {
+                this.modes.set('draw');
             }
         });
     }
