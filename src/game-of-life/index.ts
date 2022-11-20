@@ -12,35 +12,18 @@ export const CELL_SIZE = 20;
 export const PADDING = 1;
 
 export default class GameOfLife {
-	// public frameTime = 0;
-	// public lastTimeUpdated = new Date().getTime();
-
-	// public interval = null;
-
 	constructor(private root: Bootstrap) {
 		this.root.onRender.subscribe(this.render);
+		setInterval(this.calculate, 0);
 	}
 
 	// Start / Stop functionality
 
-	private interval = null;
+	private paused = true;
 
-	public isPaused = () => {
-		return this.interval === null;
-	};
-
-	public start = () => {
-		this.interval = setInterval(() => {
-			this.calculate();
-		}, 0);
-	};
-
-	public stop = () => {
-		if (this.interval) {
-			clearInterval(this.interval);
-			this.interval = null;
-		}
-	};
+	public isPaused = () => this.paused;
+	public start = () => { this.paused = false; };
+	public stop = () => { this.paused = true; };
 
 	// State updating
 
@@ -71,6 +54,10 @@ export default class GameOfLife {
 	};
 
 	private calculate = () => {
+		if (this.paused) {
+			return;
+		}
+
 		let indexedCells = []
 
 		this.state.forEach(({ x, y }) => {
@@ -94,6 +81,8 @@ export default class GameOfLife {
 
 		this.state = _.uniqBy(nextCells, ({ x, y }) => `${x},${y}`);
 	};
+
+	// Render stuff
 
 	public onWrapRender = new EventEmitter<any>();
 
