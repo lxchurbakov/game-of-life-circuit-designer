@@ -64,14 +64,20 @@ export default class AdvancedEvents {
 			this.onZoom.emitSync(e.deltaY);
 		});
 
+		let keys = {};
+
 		document.addEventListener('keydown', (e: any) => {
-			this.onKey.emitSync(e.keyCode);
-			this.onKeyDown.emitSync(e.keyCode);
+			if (!keys[e.keyCode]) {
+				this.onKey.emitSync(e.keyCode);
+				this.onKeyDown.emitSync(e.keyCode);
+				keys[e.keyCode] = true;
+			}
 		});
 
 		document.addEventListener('keyup', (e: any) => {
 			this.onKey.emitSync(e.keyCode);
 			this.onKeyUp.emitSync(e.keyCode);
+			delete keys[e.keyCode];
 		});
 	}
 };
