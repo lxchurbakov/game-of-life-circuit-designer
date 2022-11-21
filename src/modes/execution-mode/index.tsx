@@ -14,6 +14,7 @@ import { useObservable, map } from '/src/utils/observable';
 
 const ENTER_KEY = 13;
 const ONE_KEY = 49;
+const TWO_KEY = 50;
 const ZERO_KEY = 48;
 const ESC_KEY = 27;
 
@@ -75,6 +76,12 @@ export default class ExecutionMode {
                 } else {
                     this.gameOfLife.stop();
                 }
+            }
+
+            if (key === TWO_KEY) {
+                this.gameOfLife.start();
+                this.gameOfLife.calculate();
+                this.gameOfLife.stop();
             }
 
             if (key === ZERO_KEY) {

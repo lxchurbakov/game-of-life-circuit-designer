@@ -75,7 +75,6 @@ export default class AdvancedEvents {
 		});
 
 		document.addEventListener('keyup', (e: any) => {
-			this.onKey.emitSync(e.keyCode);
 			this.onKeyUp.emitSync(e.keyCode);
 			delete keys[e.keyCode];
 		});

@@ -55,7 +55,7 @@ export default class GameOfLife {
 
     // Actual game of life code
 
-	private calculate = () => {
+	public calculate = () => {
 		if (this.paused) {
 			return;
 		}
