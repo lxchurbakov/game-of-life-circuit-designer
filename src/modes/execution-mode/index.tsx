@@ -6,51 +6,41 @@ import ApplicationModes from '/src/core/application-modes';
 import AdvancedEvents from '/src/core/advanced-events';
 
 import { Play } from '@styled-icons/fa-solid/Play';
-import { StopFill } from '@styled-icons/bootstrap/StopFill';
 import { Forward } from '@styled-icons/fa-solid/Forward';
 import { Pause } from '@styled-icons/fa-solid/Pause';
+import { Infinite } from '@styled-icons/boxicons-regular/Infinite';
 
-import { useObservable, map } from '/src/utils/observable';
+import { useObservable, map, subject } from '/src/utils/observable';
 
-const ENTER_KEY = 13;
+const TILDA_KEY = 192;
 const ONE_KEY = 49;
 const TWO_KEY = 50;
 const ZERO_KEY = 48;
-const ESC_KEY = 27;
 
 const ExecutionToolbar = styled.div`
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-left: 8px;
     opacity: ${props => props.active ? '1' : '.4'};
 `;
 
-const ToolbarExtension = ({ active$ }) => {
+const ToolbarExtension = ({ active$, speed$ }) => {
     const active = useObservable(active$);
     const color = React.useMemo(() => active ? '#2196f3' : '#333', [active]);
+    const speed = useObservable(speed$);
 
     // #ff5722
 
     return (
         <ExecutionToolbar active={active}>
-            <Play color={color} width={18} />
-            <StopFill color={color} width={32} />
-            <Forward color={color} width={24} />
+            {speed === 0 && <Pause color={color} width={18} />}
+            {speed === 1 && <Play color={color} width={18} />}
+            {speed === 5 && <Forward color={color} width={28} />}
+            {speed === 1000 && <Infinite color={color} width={28} />}
+            
         </ExecutionToolbar>
     );
 };
-
-        // this.events.onKey.subscribe((key) => {        
-        //     if (key === W_KEY) {
-        //         if (this.mode === 'simulate') {
-        //             this.mode = 'edit';
-        
-        //             this.gameOfLife.stop();
-        //             this.gameOfLife.load(this.snapshot);
-        //         }
-        //     }
-        // });
 
 export default class ExecutionMode {
     private snapshot = [];
@@ -60,45 +50,62 @@ export default class ExecutionMode {
             return (
                 <ToolbarExtension
                     active$={this.modes.mode$.pipe(map((mode) => mode === 'execute'))}
+                    speed$={this.speed$}
                 />
             );
         });
 
         this.events.onKeyDown.subscribe((key) => {
-            if (key === ONE_KEY) {
-                if (this.modes.get() !== 'execute') {
-                    this.modes.set('execute');
-                    this.snapshot = this.gameOfLife.save();
-                }
+            if (key === TILDA_KEY) {
+                this.setSpeed(0);
+            }
 
-                if (this.gameOfLife.isPaused()) {
-                    this.gameOfLife.start();
-                } else {
-                    this.gameOfLife.stop();
-                }
+            if (key === ONE_KEY) {
+                this.setSpeed(1);
             }
 
             if (key === TWO_KEY) {
-                this.gameOfLife.start();
-                this.gameOfLife.calculate();
-                this.gameOfLife.stop();
+                this.setSpeed(5);
             }
 
             if (key === ZERO_KEY) {
-                this.gameOfLife.stop();
-                this.gameOfLife.load(this.snapshot);
+                this.setSpeed(1000);
+            }
+        });
+
+        this.modes.onModeChange.subscribe(({ before, after }) => {
+            if (this.interval) {
+                clearInterval(this.interval);
             }
 
-            if (key === ENTER_KEY) {
-                this.modes.set('execute');
+            if (before !== 'execute' && after === 'execute') {
                 this.snapshot = this.gameOfLife.save();
             }
 
-            if (key === ESC_KEY) {
-                this.modes.set('draw');
-                this.gameOfLife.stop();
+            if (before === 'execute' && after !== 'execute') {
                 this.gameOfLife.load(this.snapshot);
             }
         });
     }
+
+    private speed$ = subject(0);
+    private interval = null;
+
+    private setSpeed = (speed: number) => {
+        if (this.modes.get() !== 'execute') {
+            this.modes.set('execute');
+        }
+
+        this.speed$.next(speed);
+
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+
+        if (speed > 0) {
+            this.interval = setInterval(() => {
+                this.gameOfLife.tick();
+            }, 500 / speed);
+        }
+    };
 };

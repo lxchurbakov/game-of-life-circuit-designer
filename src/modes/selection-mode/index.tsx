@@ -9,10 +9,11 @@ import GameOfLife, { CELL_SIZE } from '/src/core/game-of-life';
 import { map, useObservable } from '/src/utils/observable';
 import { SelectObject } from '@styled-icons/fluentui-system-filled/SelectObject';
 import { Point } from '/src/utils/misc';
+import { toRle } from '/src/utils/rle';
 
 const S_KEY = 83;
-const R_KEY = 82;
-const BACKSPACE_KEY = 8;
+// const R_KEY = 82;
+// const BACKSPACE_KEY = 8;
 
 const ToolbarExptension = ({ active$ }) => {
     const active = useObservable(active$);
@@ -35,54 +36,170 @@ export default class SelectionMode {
                 this.modes.set('select');
             }
         });
+
+        this.modes.onModeChange.subscribe(({ before, after }) => {
+            if (before === 'select' && after !== 'select') {
+                this.selection = null;
+            }
+        });
+
+        this.setupSelection();
         
+        // this.events.onMouseDown.subscribe((p) => {
+        //     if (this.modes.get() === 'select') {
+        //         this.handleMouseDown(p);
+        //     }
+        // });
+
+        // this.events.onMouseMove.subscribe((p) => {
+        //     if (this.modes.get() === 'select') {
+        //         this.handleMouseMove(p);
+        //     }
+        // });
+
+        // this.events.onMouseUp.subscribe((p) => {
+        //     if (this.modes.get() === 'select') {
+        //         this.handleMouseUp(p);
+        //     }
+        // });
+
+        // this.navigator.onRender.subscribe((context) => {
+        //     this.render(context);
+        // });
+
+        // this.modes.onModeChange.subscribe(({ before }) => {
+        //     if (before === 'select') {
+        //         this.cleanup();
+        //     }
+        // });
+
+        // this.events.onKey.subscribe((key) => {
+        //     if (this.modes.get() === 'select') {
+        //         if (key === BACKSPACE_KEY) {
+        //             this.deleteSelection();
+        //         }
+
+        //         if (key === R_KEY) {
+        //             this.rotateSelection();
+        //         }
+        //     }
+        // })
+    }
+
+    // Seletion logic
+
+    private selection = null as null | { from: Point, to: Point };
+    private selectionMode = 'idle' as 'idle' | 'select' | 'move';
+    private isMouseOverSelection = false;
+    private cellStartDrag = null as null | Point;
+    // private dragStart = null as null | Point;
+    // private mouseOverSelection = false;
+    // private mode = 'idle' as 'idle' | 'select' | 'drag';
+
+    private setupSelection = () => {
         this.events.onMouseDown.subscribe((p) => {
             if (this.modes.get() === 'select') {
-                this.handleMouseDown(p);
+                const cell = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
+
+                if (this.selectionMode === 'idle') {
+                    if (this.isMouseOverSelection) {
+                        this.selectionMode = 'move';
+                        this.cellStartDrag = cell;
+                    } else {
+                        this.selection = { from: cell, to: cell };
+                        this.selectionMode = 'select';
+                    }                        
+                }
             }
         });
 
         this.events.onMouseMove.subscribe((p) => {
             if (this.modes.get() === 'select') {
-                this.handleMouseMove(p);
+                const cell = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
+
+                if (this.selectionMode === 'idle') {
+                    this.isMouseOverSelection = (this.selection !== null) && (this.cellInSelection(cell));
+                }
+
+                if (this.selectionMode === 'select') {
+                    this.selection.to = cell;
+                }
+
+                if (this.selectionMode === 'move') {
+                    const dx = cell.x - this.cellStartDrag.x;
+                    const dy = cell.y - this.cellStartDrag.y;
+
+                    this.moveSelection(dx, dy);
+                    this.cellStartDrag = cell;
+                }
             }
         });
 
-        this.events.onMouseUp.subscribe((p) => {
-            if (this.modes.get() === 'select') {
-                this.handleMouseUp(p);
-            }
+        this.events.onMouseUp.subscribe(() => {
+            this.selectionMode = 'idle';
         });
 
         this.navigator.onRender.subscribe((context) => {
-            this.render(context);
-        });
-
-        this.modes.onModeChange.subscribe(({ before }) => {
-            if (before === 'select') {
-                this.cleanup();
+            if (this.selection) {
+                context.beginPath();
+                context.rect(
+                    this.selection.from.x * CELL_SIZE,
+                    this.selection.from.y * CELL_SIZE,
+                    (this.selection.to.x - this.selection.from.x) * CELL_SIZE,
+                    (this.selection.to.y - this.selection.from.y) * CELL_SIZE
+                );
+    
+                context.setLineDash([15, 5]);
+                context.lineWidth = 3;
+                context.stroke();
+                context.setLineDash([]);
             }
         });
 
-        this.events.onKey.subscribe((key) => {
-            if (this.modes.get() === 'select') {
-                if (key === BACKSPACE_KEY) {
-                    this.deleteSelection();
-                }
-
-                if (key === R_KEY) {
-                    this.rotateSelection();
-                }
+        this.events.onKeyDown.subscribe((key) => {
+            if (this.modes.get() !== 'select' || this.selection === null) {
+                return;
             }
-        })
-    }
 
-    // Seletion logic
+            // Move with arrows
+            if (key === 37) { // left
+                this.moveSelection(-1, 0);
+            }
 
-    public selection = null as null | { from: Point, to: Point };
-    private dragStart = null as null | Point;
-    private mouseOverSelection = false;
-    private mode = 'idle' as 'idle' | 'select' | 'drag';
+            if (key === 39) { // right
+                this.moveSelection(1, 0);
+            }
+
+            if (key === 40) { // down
+                this.moveSelection(0, 1);
+            }
+
+            if (key === 38) { // up
+                this.moveSelection(0, -1);
+            }
+
+            // Flip
+
+            if (key === 65) { // a
+                this.flipSelection(false, true);
+            }
+
+            if (key === 87) { // a
+                this.flipSelection(true, false);
+            }
+
+            if (key === 8) {
+                this.removeCells();
+            }
+
+            if (key === 13) {
+                console.log(this.copySelection());
+            }
+        });
+
+    };
+
+    // Helpers
 
     private cellInSelection = (cellPosition: Point) => {
         return this.selection !== null && (
@@ -93,117 +210,160 @@ export default class SelectionMode {
         );
     };
 
-    private handleMouseDown = (p: Point) => {
-        if (this.mouseOverSelection) {
-            this.mode = 'drag';
-            this.dragStart = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
-        } else {
-            this.selection = {
-                from: this.gameOfLife.cellCoords(this.navigator.untranslate(p)),
-                to: this.gameOfLife.cellCoords(this.navigator.untranslate(p)),
-            }; 
+    private moveSelection = (dx: number, dy: number) => {
+        this.gameOfLife.state.forEach((cell) => {
+            if (this.cellInSelection(cell)) {
+                cell.x += dx;
+                cell.y += dy;
+            }
+        });
 
-            this.mode = 'select';
-        }
+        this.selection.from.x += dx;
+        this.selection.from.y += dy;
+        this.selection.to.x += dx;
+        this.selection.to.y += dy;
     };
 
-    private handleMouseMove = (p: Point) => {
-        if (this.mode === 'select') {
-            this.selection.to = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
-        }
+    private flipSelection = (vertical: boolean, horizontal: boolean) => {
+        const dx = (this.selection.to.x + this.selection.from.x) / 2;
+        const dy = (this.selection.to.y + this.selection.from.y) / 2;
 
-        if (this.mode === 'idle') {
-            this.mouseOverSelection = this.selection !== null 
-                && this.cellInSelection(this.gameOfLife.cellCoords(this.navigator.untranslate(p)));
-        }
-
-        if (this.mode === 'drag') {
-            const dragEnd = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
-
-            const dx = dragEnd.x - this.dragStart.x;
-            const dy = dragEnd.y - this.dragStart.y;
-
-            this.gameOfLife.state.forEach((cell) => {
-                if (this.cellInSelection(cell)) {
-                    cell.x += dx;
-                    cell.y += dy;
+        this.gameOfLife.state.forEach((cell) => {
+            if (this.cellInSelection(cell)) {
+                if (horizontal) {
+                    cell.x = -(cell.x - dx) + dx;
                 }
-            });
 
-            this.dragStart = dragEnd;
-
-            this.selection.from.x += dx;
-            this.selection.from.y += dy;
-            this.selection.to.x += dx;
-            this.selection.to.y += dy;
-        }
-    };
-
-    private handleMouseUp = (p: Point) => {
-        this.mode = 'idle';
-    };
-
-    private render = (context: CanvasRenderingContext2D) => {
-        if (this.selection) {
-            context.beginPath();
-            context.rect(
-                this.selection.from.x * CELL_SIZE,
-                this.selection.from.y * CELL_SIZE,
-                (this.selection.to.x - this.selection.from.x) * CELL_SIZE,
-                (this.selection.to.y - this.selection.from.y) * CELL_SIZE
-            );
-
-            context.setLineDash([15, 5]);
-            context.lineWidth = 5;
-            context.stroke();
-            context.setLineDash([]);
-        }
-    };
-
-    private cleanup = () => {
-        this.selection = null;
-        this.mode = 'idle';
-    };
-
-    private deleteSelection = () => {
-        if (this.selection !== null) {
-            this.gameOfLife.state.forEach((cell) => {
-                if (this.cellInSelection(cell)) {
-                    this.gameOfLife.remove(cell.x, cell.y);
+                if (vertical) {
+                    cell.y = -(cell.y - dy) + dy;
                 }
-            });
-        }
+            }
+        });
     };
 
-    private rotateSelection = () => {
-        if (this.selection !== null) {
-            const dx = (this.selection.to.x + this.selection.from.x) / 2;
-            const dy = (this.selection.to.y + this.selection.from.y) / 2;
-
-            const cells = this.gameOfLife.state.filter((cell) => this.cellInSelection(cell));
-
-            const rotateCell = (cell: Point) => {
-                const x = cell.x - dx;
-                const y = cell.y - dy;
-
-                const newY = dy - x;
-                const newX = dx - y;
-
-                return { x: newX, y: newY };
-            };
-
-            cells.forEach((cell) => {
-                const newCell = rotateCell(cell);
-
+    private removeCells = () => {
+        this.gameOfLife.state.forEach((cell) => {
+            if (this.cellInSelection(cell)) {
                 this.gameOfLife.remove(cell.x, cell.y);
-                this.gameOfLife.put(newCell.x, newCell.y);
-            });
+            }
+        });
+    };
 
-            const newFrom = rotateCell(this.selection.from);
-            const newTo = rotateCell(this.selection.to);
+    private copySelection = () => {
+        return toRle(this.gameOfLife.state.filter((cell) => this.cellInSelection(cell)));
+    };
+
+    // private handleMouseDown = (p: Point) => {
+    //     if (this.mouseOverSelection) {
+    //         this.mode = 'drag';
+    //         this.dragStart = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
+    //     } else {
+    //         this.selection = {
+    //             from: this.gameOfLife.cellCoords(this.navigator.untranslate(p)),
+    //             to: this.gameOfLife.cellCoords(this.navigator.untranslate(p)),
+    //         }; 
+
+    //         this.mode = 'select';
+    //     }
+    // };
+
+    // private handleMouseMove = (p: Point) => {
+    //     if (this.mode === 'select') {
+    //         this.selection.to = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
+    //     }
+
+    //     if (this.mode === 'idle') {
+    //         this.mouseOverSelection = this.selection !== null 
+    //             && this.cellInSelection(this.gameOfLife.cellCoords(this.navigator.untranslate(p)));
+    //     }
+
+    //     if (this.mode === 'drag') {
+    //         const dragEnd = this.gameOfLife.cellCoords(this.navigator.untranslate(p));
+
+    //         const dx = dragEnd.x - this.dragStart.x;
+    //         const dy = dragEnd.y - this.dragStart.y;
+
+    //         this.gameOfLife.state.forEach((cell) => {
+    //             if (this.cellInSelection(cell)) {
+    //                 cell.x += dx;
+    //                 cell.y += dy;
+    //             }
+    //         });
+
+    //         this.dragStart = dragEnd;
+
+    //         this.selection.from.x += dx;
+    //         this.selection.from.y += dy;
+    //         this.selection.to.x += dx;
+    //         this.selection.to.y += dy;
+    //     }
+    // };
+
+    // private handleMouseUp = (p: Point) => {
+    //     this.mode = 'idle';
+    // };
+
+    // private render = (context: CanvasRenderingContext2D) => {
+    //     if (this.selection) {
+    //         context.beginPath();
+    //         context.rect(
+    //             this.selection.from.x * CELL_SIZE,
+    //             this.selection.from.y * CELL_SIZE,
+    //             (this.selection.to.x - this.selection.from.x) * CELL_SIZE,
+    //             (this.selection.to.y - this.selection.from.y) * CELL_SIZE
+    //         );
+
+    //         context.setLineDash([15, 5]);
+    //         context.lineWidth = 5;
+    //         context.stroke();
+    //         context.setLineDash([]);
+    //     }
+    // };
+
+    // private cleanup = () => {
+    //     this.selection = null;
+    //     this.mode = 'idle';
+    // };
+
+    // private deleteSelection = () => {
+    //     if (this.selection !== null) {
+    //         this.gameOfLife.state.forEach((cell) => {
+    //             if (this.cellInSelection(cell)) {
+    //                 this.gameOfLife.remove(cell.x, cell.y);
+    //             }
+    //         });
+    //     }
+    // };
+
+    // private rotateSelection = () => {
+    //     if (this.selection !== null) {
+    //         const dx = (this.selection.to.x + this.selection.from.x) / 2;
+    //         const dy = (this.selection.to.y + this.selection.from.y) / 2;
+
+    //         const cells = this.gameOfLife.state.filter((cell) => this.cellInSelection(cell));
+
+    //         const rotateCell = (cell: Point) => {
+    //             const x = cell.x - dx;
+    //             const y = cell.y - dy;
+
+    //             const newY = dy - x;
+    //             const newX = dx - y;
+
+    //             return { x: newX, y: newY };
+    //         };
+
+    //         cells.forEach((cell) => {
+    //             const newCell = rotateCell(cell);
+
+    //             this.gameOfLife.remove(cell.x, cell.y);
+    //             this.gameOfLife.put(newCell.x, newCell.y);
+    //         });
+
+    //         const newFrom = rotateCell(this.selection.from);
+    //         const newTo = rotateCell(this.selection.to);
             
-            this.selection.from = newFrom;
-            this.selection.to = newTo;
-        }
-    }
+    //         this.selection.from = newFrom;
+    //         this.selection.to = newTo;
+    //     }
+    // }
 }

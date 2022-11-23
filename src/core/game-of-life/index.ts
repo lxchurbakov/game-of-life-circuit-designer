@@ -17,16 +17,16 @@ export default class GameOfLife {
 		this.navigator.onRender.subscribe(this.render);
 
         // Calculate all the time
-		setInterval(this.calculate, 0);
+		// setInterval(this.calculate, 0);
 	}
 
 	// Start / Stop functionality
 
-	private paused = true;
+	// private paused = true;
 
-	public isPaused = () => this.paused;
-	public start = () => { this.paused = false; };
-	public stop = () => { this.paused = true; };
+	// public isPaused = () => this.paused;
+	// public start = () => { this.paused = false; };
+	// public stop = () => { this.paused = true; };
 
 	// State updating
 
@@ -55,12 +55,8 @@ export default class GameOfLife {
 
     // Actual game of life code
 
-	public calculate = () => {
-		if (this.paused) {
-			return;
-		}
-
-		let indexedCells = []
+	public tick = () => {
+		let indexedCells = [];
 
 		this.state.forEach(({ x, y }) => {
 			indexedCells[x] = indexedCells[x] || [];
@@ -70,15 +66,11 @@ export default class GameOfLife {
 		let nextCells = [];
 
 		this.state.forEach(({ x, y }) => {
-			[
-				[x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
-				[x - 1, y], [x, y], [x + 1, y],
-				[x - 1, y + 1], [x, y + 1], [x + 1, y + 1],
-			].forEach(([x, y]) => {
-				if (shouldBeAlive(indexedCells, x, y)) {
-					nextCells.push({ x, y })
+			;[[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]].forEach(([dx, dy]) => {
+				if (shouldBeAlive(indexedCells, x + dx, y + dy)) {
+					nextCells.push({ x: x + dx, y: y + dy });
 				}
-			})
+			});
 		});
 
 		this.state = _.uniqBy(nextCells, ({ x, y }) => `${x},${y}`);
