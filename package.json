@@ -2,7 +2,7 @@
   "name": "game-of-life",
   "version": "1.0.0",
   "scripts": {
-    "build": "npx webpack --config src/webpack.config.js",
+    "build": "npx parcel build src/index.html",
     "dev": "npx parcel serve src/index.html"
   },
   "author": "swensson",
