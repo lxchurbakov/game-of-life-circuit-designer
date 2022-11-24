@@ -68,6 +68,14 @@ export default class ExecutionMode {
                 this.setSpeed(5);
             }
 
+            if (key === 51) {
+                this.setSpeed(10);
+            }
+
+            if (key === 52) {
+                this.setSpeed(100);
+            }
+
             if (key === ZERO_KEY) {
                 this.setSpeed(1000);
             }

@@ -13,6 +13,7 @@ import ExecutionMode from './modes/execution-mode';
 import SelectionMode from './modes/selection-mode';
 
 import Palette from './extensions/palette';
+import Trails from './extensions/trails';
 
 document.addEventListener('DOMContentLoaded', (e) => {
 	const root = document.getElementById('app');
@@ -32,4 +33,5 @@ document.addEventListener('DOMContentLoaded', (e) => {
 	const execution = new ExecutionMode(toolbar, gameOfLife, modes, events);
 
 	const palette = new Palette(sidebar, gameOfLife, navigator);
+	const trails = new Trails(gameOfLife, navigator);
 });

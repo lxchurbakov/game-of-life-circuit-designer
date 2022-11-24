@@ -103,7 +103,7 @@ export const toRle = (cells: Point[]) => {
 export const GLIDER_GUN = fromRle('24bo$22bobo$12b2o6b2o12b2o$11bo3bo4b2o12b2o$2o8bo5bo3b2o$2o8bo3bob2o4bobo$10bo5bo7bo$11bo3bo$12b2o!');
 export const GLIDER = fromRle('bo$2bo$3o!');
 export const GLIDER_REFLECTOR = fromRle('10bo$8bobo$7bobo$6bo2bo11b2o$7bobo11b2o$2b2o4bobo$bobo6bo$bo$2o!');
-export const GLIDER_EATER = fromRle('2o2b$obob$2bob$2b2bo!');
+export const GLIDER_EATER = fromRle('2o2b$obob$2bob$2b2o$');
 
 export const GLIDER_GUN_P60 = fromDots(`
 ............................O..........

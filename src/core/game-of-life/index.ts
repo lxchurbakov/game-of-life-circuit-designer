@@ -4,6 +4,7 @@ import Bootstrap from '../bootstrap';
 import Navigator from '../navigator';
 
 import { shouldBeAlive } from './utils';
+import { EventEmitter } from '/src/utils/events';
 import { Point } from '/src/utils/misc';
 
 export type Cell = Point;
@@ -55,6 +56,8 @@ export default class GameOfLife {
 
     // Actual game of life code
 
+	public onAfterTick = new EventEmitter<null>();
+
 	public tick = () => {
 		let indexedCells = [];
 
@@ -74,6 +77,7 @@ export default class GameOfLife {
 		});
 
 		this.state = _.uniqBy(nextCells, ({ x, y }) => `${x},${y}`);
+		this.onAfterTick.emitParallelSync(null);
 	};
 
 	// Render actual game state
