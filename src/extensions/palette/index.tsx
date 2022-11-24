@@ -37,7 +37,7 @@ export default class Palette {
                     {PALETTE_ELEMENTS.map((element, index) => {
                         return (
                             <PaletteItem key={index} onClick={() => this.create(element.state)}>
-                                {element.icon} {element.name}
+                                {element.name}
                             </PaletteItem>
                         );
                     })}
